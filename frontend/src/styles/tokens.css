@@ -1,0 +1,126 @@
+/*
+  Bitarnos design tokens
+  ----------------------
+  Dark, slightly blue-tinted base (not pure black) with two accent hues:
+  green = "alive / running / go", blue = "info / network / water".
+  Display type is Space Grotesk (blocky, geometric — echoes voxel shapes
+  without literally using a game's typeface); body is Inter; console/data
+  uses JetBrains Mono.
+*/
+
+:root {
+  /* Surfaces */
+  --bg: #0b0f14;
+  --bg-elevated: #0e141b;
+  --surface: #121821;
+  --surface-raised: #1a222d;
+  --surface-hover: #212b38;
+  --border: #26313d;
+  --border-strong: #34404d;
+
+  /* Text */
+  --text-primary: #e7edf3;
+  --text-secondary: #a9b6c4;
+  --text-muted: #728093;
+
+  /* Accents */
+  --green: #43d17a;
+  --green-dim: #2a9a5c;
+  --green-bg: rgba(67, 209, 122, 0.12);
+  --blue: #3ea6e0;
+  --blue-dim: #2f7fb0;
+  --blue-bg: rgba(62, 166, 224, 0.12);
+
+  /* Status */
+  --danger: #e5484d;
+  --danger-bg: rgba(229, 72, 77, 0.12);
+  --warning: #e8a33d;
+  --warning-bg: rgba(232, 163, 61, 0.12);
+
+  /* Type */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Shape & motion */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image: radial-gradient(circle at 20% -10%, rgba(62, 166, 224, 0.08), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(67, 209, 122, 0.06), transparent 35%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--green-dim);
+  color: #05130a;
+}
+
+/* Scrollbars — kept subtle rather than default chunky browser bars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

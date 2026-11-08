@@ -1,0 +1,8 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Original isometric pixel-cube mark for Bitarnos -->
+  <polygon points="32,4 58,18 58,46 32,60 6,46 6,18" fill="#121821"/>
+  <polygon points="32,4 58,18 32,32 6,18" fill="#3EA6E0"/>
+  <polygon points="6,18 32,32 32,60 6,46" fill="#2A9A5C"/>
+  <polygon points="58,18 32,32 32,60 58,46" fill="#43D17A"/>
+  <path d="M22 24 h6 a4 4 0 0 1 0 8 h-6 z m0 8 h7 a4 4 0 0 1 0 8 h-7 z" fill="none" stroke="#0B0F14" stroke-width="2.4" stroke-linejoin="round" transform="translate(0 -4)"/>
+</svg>
