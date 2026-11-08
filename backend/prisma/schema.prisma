@@ -1,0 +1,212 @@
+// Bitarnos database schema
+// PostgreSQL via Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ServerSoftware {
+  VANILLA
+  PAPER
+  SPIGOT
+  FABRIC
+  FORGE
+  PURPUR
+}
+
+enum ServerStatus {
+  OFFLINE
+  STARTING
+  ONLINE
+  STOPPING
+  CRASHED
+}
+
+enum BackupStatus {
+  PENDING
+  RUNNING
+  COMPLETE
+  FAILED
+}
+
+enum PlayerListType {
+  WHITELIST
+  OPERATOR
+  BANNED
+}
+
+enum NotificationLevel {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+// ── Models ─────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String
+  role          Role     @default(USER)
+  isSuspended   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  servers            Server[]
+  notifications      Notification[]
+  passwordResetTokens PasswordResetToken[]
+  refreshTokens      RefreshToken[]
+  auditLogs          AuditLog[]
+
+  // Resource caps enforced by the admin panel
+  maxServers    Int @default(3)
+  maxRamMb      Int @default(4096)
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Server {
+  id             String         @id @default(uuid())
+  name           String
+  ownerId        String
+  owner          User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  software       ServerSoftware @default(PAPER)
+  mcVersion      String         @default("1.21.1")
+  status         ServerStatus   @default(OFFLINE)
+
+  // Container identity
+  containerId    String?
+  containerName  String         @unique
+  hostPort       Int            @unique
+
+  // Resource allocation
+  ramMb          Int            @default(2048)
+  cpuLimit       Float          @default(2.0)
+  maxPlayers     Int            @default(20)
+
+  // Filesystem
+  dataPath       String
+
+  motd           String         @default("A Bitarnos Minecraft Server")
+  difficulty     String         @default("normal")
+  gamemode       String         @default("survival")
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  lastStartedAt  DateTime?
+
+  backups        Backup[]
+  playerEntries  PlayerListEntry[]
+  backupSchedule BackupSchedule?
+  metrics        ServerMetric[]
+
+  @@index([ownerId])
+}
+
+model Backup {
+  id         String       @id @default(uuid())
+  serverId   String
+  server     Server       @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  fileName   String
+  sizeBytes  BigInt       @default(0)
+  status     BackupStatus @default(PENDING)
+  automatic  Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  completedAt DateTime?
+
+  @@index([serverId])
+}
+
+model BackupSchedule {
+  id            String   @id @default(uuid())
+  serverId      String   @unique
+  server        Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  enabled       Boolean  @default(false)
+  intervalHours Int      @default(24)
+  retainCount   Int      @default(7)
+  lastRunAt     DateTime?
+  nextRunAt     DateTime?
+}
+
+model PlayerListEntry {
+  id        String         @id @default(uuid())
+  serverId  String
+  server    Server         @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  type      PlayerListType
+  username  String
+  uuid      String?
+  reason    String?
+  addedAt   DateTime       @default(now())
+
+  @@unique([serverId, type, username])
+  @@index([serverId, type])
+}
+
+model ServerMetric {
+  id         String   @id @default(uuid())
+  serverId   String
+  server     Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  cpuPercent Float
+  ramMb      Float
+  playerCount Int
+  recordedAt DateTime @default(now())
+
+  @@index([serverId, recordedAt])
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level     NotificationLevel  @default(INFO)
+  title     String
+  message   String
+  read      Boolean            @default(false)
+  createdAt DateTime           @default(now())
+
+  @@index([userId, read])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  target    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
